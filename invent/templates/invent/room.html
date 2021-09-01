@@ -1,0 +1,222 @@
+{% extends 'invent/base.html' %}
+
+{% block content %}
+    <div class="d-flex flex-row justify-content-between">
+        <div class="p-2 w-75 h-100 bd-highlight">
+            <table class="table table-striped table-bordered table-hover">
+                <thead class="thead-light">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">id</th>
+                    <th scope="col">Название</th>
+                    <th scope="col">Отдел</th>
+                    <th scope="col">Комментарий</th>
+                    {% if perms.invent.change_location %}
+                        <th scope="col">Функции</th>
+                    {% endif %}
+                </tr>
+                </thead>
+                <tbody>
+                {% for s in room %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td>{{ s.id }}</td>
+                        <td>{{ s.room }}</td>
+                        <td>{{ s.department }}</td>
+                        <td>
+                            <div class="dropdown d-flex justify-content-between">
+                                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                   <i class="fa fa-commenting"></i>
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                    {{ s.comment }}
+                                </div>
+                            </div>
+                        </td>
+                        {% if perms.invent.change_location %}
+                            <td>
+                                <div class="form-row">
+                                    <!-- Button trigger modal -->
+                                    <button type="button" class="btn btn-info" data-target="#modal-item-{{ s.id }}"
+                                            data-toggle="modal" id="update-item-{{ s.id }}"><i class="fa fa-pencil"></i>
+                                    </button>
+                                    <div class="modal fade" id="modal-item-{{ s.id }}" tabindex="-1" role="dialog"
+                                         aria-labelledby="ModalLabel-{{ s.id }}" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="ModalLabel-{{ s.id }}">Изменить</h5>
+                                                    <button type="button" class="close" data-dismiss="modal"
+                                                            aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form>
+                                                        {% csrf_token %}
+                                                        <div class="form-group">
+                                                            <label for="item-name-{{ s.id }}"
+                                                                   class="col-form-label">Название</label>
+                                                            <input type="text" class="form-control"
+                                                                   id="item-name-{{ s.id }}"
+                                                                   value="{{ s.room}}">
+                                                            <label for="item-department-{{ s.id }}"
+                                                                   class="col-form-label">Отдел</label>
+                                                            <select class="selectpicker form-control"
+                                                                    aria-label="modal select"
+                                                                    name="modal-select-department"
+                                                                    id="item-department-{{ s.id }}">
+                                                                <option selected value="0">Не выбрано</option>
+                                                                {% for d in deps %}
+                                                                    <option value="{{ d }}">{{ d }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                            <label for="item-comment-{{ s.id }}"
+                                                                   class="col-form-label">Комментарий</label>
+                                                            <input type="text" class="form-control"
+                                                                   id="item-comment-{{ s.id }}"
+                                                                   value="{{ s.comment }}">
+                                                        </div>
+
+                                                    </form>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                            data-dismiss="modal">
+                                                        Закрыть
+                                                    </button>
+                                                    <button type="button" id="modal-submit-{{ s.id }}"
+                                                            class="btn btn-primary">
+                                                        Изменить
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Сделать MODAL -->
+                                    <button type="button" class="btn btn-danger" data-target="#modal-delete-{{ s.id }}"
+                                            data-toggle="modal" id="modal-try-{{ s.id }}"><i class="fa fa-trash"></i>
+                                    </button>
+                                    <div class="modal fade" id="modal-delete-{{ s.id }}" tabindex="-1" role="dialog"
+                                         aria-labelledby="modal-delete-label-{{ s.id }}" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="modal-delete-label-{{ s.id }}">
+                                                        Удалить</h5>
+                                                    <button type="button" class="close" data-dismiss="modal"
+                                                            aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    Вы уверены?
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                            data-dismiss="modal">
+                                                        Закрыть
+                                                    </button>
+                                                    <button type="button" id="delete-item-{{ s.id }}"
+                                                            class="btn btn-primary">
+                                                        Удалить
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        {% endif %}
+                    </tr>
+                    <script>
+                        $(document).ready(function () {
+                            $('#delete-item-{{ s.id }}').click(function (e) {
+                                e.preventDefault()
+                                $.ajax({
+                                    data: {
+                                        id: {{ s.id }}
+                                    },
+                                    type: 'GET',
+                                    url: '{% url 'delete_loc' %}',
+                                    success: function (response) {
+                                        location.reload(true)
+                                    },
+                                    error: function (response) {
+                                        alert('error')
+                                    }
+                                });
+                            })
+                        })
+                    </script>
+                    <script>
+                        $(document).ready(function () {
+                            $('#modal-submit-{{ s.id }}').click(function (e) {
+                                e.preventDefault()
+                                $.ajax({
+                                    data: {
+                                        id: {{ s.id }},
+                                        room: $("#item-name-{{ s.id }}").val(),
+                                        dep: $("#item-department-{{ s.id }}").val(),
+                                        comment: $("#item-comment-{{ s.id }}").val(),
+                                        csrfmiddlewaretoken: '{{ csrf_token }}'
+                                    },
+                                    type: 'POST',
+                                    url: '{% url 'update_loc' %}',
+                                    success: function (response) {
+                                        location.reload(true)
+                                    },
+                                    error: function (response) {
+                                        alert('error')
+                                    }
+
+                                });
+                                return false
+                            })
+                        })
+                    </script>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="accordion p-2 w-25 h-100 bd-highlight" id="accordion-home">
+            {% if perms.invent.add_location %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingTwo">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                            Добавить
+                        </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                         data-bs-parent="#accordionExample">
+                        <div class="accordion-body">
+
+                            <form class="px-3 py-3 post-form" method="POST">{% csrf_token %}
+                                <div class="form-group">
+                                    {{ form.as_p }}
+                                </div>
+                                <button type="submit" class="btn btn-primary">Добавить</button>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block search %}
+    <form class="d-flex" action="{% url 'location' %}" method="GET">
+        <select class="selectpicker form-control" aria-label=" multiple select example" name="s">
+            <option selected value="0">По названию</option>
+            <option value="1">По отделу</option>
+        </select>
+        <input type="text" name="q" class="form-control me-2">
+
+        <button class="btn btn-outline-success" type="submit">Поиск</button>
+    </form>
+{% endblock %}

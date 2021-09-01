@@ -1,0 +1,11 @@
+<form class="d-flex" id="choose-room" method="GET">
+    <select class="selectpicker form-control" aria-label="select example"
+            name="select-room" id="select-room">
+        {% for i in context %}
+            <option value="{{ i.room }}">
+                {{ i.room }}
+            </option>
+        {% endfor %}
+    </select>
+</form>
+

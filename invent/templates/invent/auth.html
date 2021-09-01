@@ -1,0 +1,53 @@
+{% load crispy_forms_filters %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>authentication</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'invent/css/auth.css' %}">
+    {% load crispy_forms_tags %}
+</head>
+<body>
+
+<div class="auth">
+    <form class="login-form" action="{% url 'auth' %}" method="POST">
+        {% csrf_token %}
+        {% if wrong_info == "true" %}
+            <script>
+                alert('{{ wrong_info }}')
+            </script>
+            <p style="color: red">Ошибки в логине или пароле</p>
+        {% endif %}
+        <input type="hidden" name="next" value="{{ next }}">
+        <div class="form-group">
+            <label for="inputLogin">Логин</label>
+            <input type="text" class="form-control" id="inputLogin" aria-describedby="loginHelp"
+                   placeholder="Введите логин" name="username">
+        </div>
+        <div class="form-group">
+            <label for="inputPassword">Пароль</label>
+            <input type="password" class="form-control" id="inputPassword" placeholder="Введите пароль" name="password">
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+</div>
+<footer class="py-4 bg-dark flex-shrink-0">
+    <div class="container text-center">
+        <div class="navbar navbar-inverse fixed-bottom" role="navigation" id="ind-footer">
+            <div class="navbar-text pull-left">
+            </div>
+            <div class="navbar-text pull-right">
+                <a href="https://github.com/artemychych">
+                    <i class="fa fa-github-square fa-2x white-col"></i></a>
+            </div>
+            <div class="navbar-text pull-left white-col">
+                &copy; НВК Саха, 2021
+            </div>
+        </div>
+    </div>
+</footer>
+</body>
+</html>
